@@ -5,10 +5,9 @@ from models import Usuario, Produto, Movimentacao , db_session
 from datetime import datetime
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'chave-secreta' #Nome da senha
+app.config['SECRET_KEY'] = 'batata'
 
 
-#config flask login
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.login_message = 'Faça login para acessar o sistema'
@@ -36,9 +35,7 @@ def login():
         return render_template('login.html')
 
     usuario = db_session.execute(select(Usuario).where(Usuario.email == email)).scalar()
-    #ou assim
-    #sql_user = select(Usuario).where(Usuario.email == email)
-    #usuario_exist = db_session.execute(sql_user).scalar()
+   
     if usuario and usuario.check_password(senha):
         login_user(usuario)
         return redirect(url_for('dashboard'))
@@ -109,10 +106,6 @@ def excluir_produto(id):
         flash('Produto não encontrado.', 'warning')
 
     return redirect(url_for('gerenciar_produto'))
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5006, host='0.0.0.0')
-
 
 @app.route('/produto/', methods=['GET','POST'])
 @login_required
