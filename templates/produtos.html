@@ -11,7 +11,7 @@
     <div class="card-body">
         <!-- Requisito 6.1.2: Campo de Busca -->
         <form method="POST" action="{{ url_for('gerenciar_produto') }}" class="d-flex mb-3">
-            <input type="text" name="busca" class="form-control me-2" placeholder="Buscar produto por nome..." value="{{ busca }}">
+            <input type="text" name="busca" class="form-control me-2" placeholder="Buscar produto por nome..." value="{{ busca or '' }}">
             <button class="btn btn-outline-primary" type="submit">Buscar</button>
             <a href="{{ url_for('gerenciar_produto') }}" class="btn btn-outline-secondary ms-2">Limpar</a>
         </form>
@@ -43,55 +43,68 @@
                     <td>{{ p.estoque_minimo }}</td>
                     <td>
                         <!-- Botão Editar (Abre Modal preenchido) -->
-                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#modalProduto{{ p.id }}">Editar</button>
+                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#modalProduto{{ p.id }}">
+                            Editar
+                        </button>
 
-                        <!-- Requisito 6.1.5: Botão Excluir (Formulário inline) -->
-                        <form method="POST" action="#" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Certeza que deseja excluir?')">Excluir</button>
+                        <!-- Requisito 6.1.5: Botão Excluir (Aponta para a rota passando o ID) -->
+                        <form method="POST" action="{{ url_for('excluir_produto', id=p.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Certeza que deseja excluir o produto {{ p.nome }}?')">
+                                Excluir
+                            </button>
                         </form>
                     </td>
                 </tr>
-
-                <!-- Modal de Edição (Específico para este Produto) -->
-                <div class="modal fade" id="modalProduto{{ p.id }}" tabindex="-1">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form method="POST" action="{{ url_for('salvar_produto') }}">
-                                <div class="modal-header"><h5 class="modal-title">Editar Produto</h5></div>
-                                <div class="modal-body">
-                                    <input type="hidden" name="id" value="{{ p.id }}">
-                                    <div class="mb-3">
-                                        <label>Nome</label>
-                                        <input type="text" class="form-control" name="nome" value="{{ p.nome }}" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Descrição</label>
-                                        <input type="text" class="form-control" name="descricao" value="{{ p.descricao }}">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label>Estoque Mínimo</label>
-                                        <input type="number" class="form-control" name="estoque_minimo" value="{{ p.estoque_minimo }}" required>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
 
+<!-- Modais de Edição (Posicionadas fora da tabela para evitar erro de envio de formulário) -->
+{% for p in produtos %}
+<div class="modal fade" id="modalProduto{{ p.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('salvar_produto') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" value="{{ p.id }}">
+                    <div class="mb-3">
+                        <label>Nome</label>
+                        <input type="text" class="form-control" name="nome" value="{{ p.nome }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Descrição</label>
+                        <input type="text" class="form-control" name="descricao" value="{{ p.descricao }}">
+                    </div>
+                    <div class="mb-3">
+                        <label>Estoque Mínimo</label>
+                        <input type="number" class="form-control" name="estoque_minimo" value="{{ p.estoque_minimo }}" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 <!-- Modal para NOVO Produto -->
 <div class="modal fade" id="modalProduto" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="POST" action="{{ url_for('salvar_produto') }}">
-                <div class="modal-header"><h5 class="modal-title">Cadastrar Novo Produto</h5></div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar Novo Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label>Nome</label>
@@ -108,6 +121,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-success">Salvar Produto</button>
                 </div>
             </form>

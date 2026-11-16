@@ -61,34 +61,58 @@ def dashboard():
 @app.route('/produto/salvar', methods=['POST'])
 @login_required
 def salvar_produto():
-    id_produto = request.form.get('id_produto')
+    produto_id = request.form.get('id')
     nome = request.form.get('nome')
     descricao = request.form.get('descricao')
-    estoque_minimo = request.form.get('estoque_minimo')
+    estoque_minimo = int(request.form.get('estoque_minimo', 5))
 
-    if not nome or not estoque_minimo:
-        flash('Erro: Nome e Estoque minimo são obrigatórios!','danger')
-        return redirect(url_for('salvar_produto'))
-    try:
-        if id_produto:
-            produto = db_session.get(Produto, id_produto)
+    if produto_id:
+        produto = db_session.get(Produto, int(produto_id))
+        if produto:
             produto.nome = nome
             produto.descricao = descricao
             produto.estoque_minimo = estoque_minimo
-            flash('Produto atualizado com sucesso!','success')
-        else:
-            novo_produto = Produto(
-                nome = nome,
-                descricao = descricao,
-                estoque_minimo =int(estoque_minimo),
-            )
-            db_session.add(novo_produto)
-            flash('Produto salvado com sucesso!','success')
+            flash('Produto atualizado com sucesso!', 'success')
+    else:
+        novo_produto = Produto(
+            nome=nome,
+            descricao=descricao,
+            estoque_minimo=estoque_minimo
+        )
+        db_session.add(novo_produto)
+        flash('Produto cadastrado com sucesso!', 'success')
+
+    db_session.commit()
+    return redirect(url_for('gerenciar_produto'))
+
+@app.route('/produto/', methods=['GET', 'POST'])
+@login_required
+def gerenciar_produto():
+    if request.method == 'POST':
+        termo_busca = request.form.get('busca')
+        busca = select(Produto).where(Produto.nome.like(f'%{termo_busca}%'))
+        busca_resultado = db_session.execute(busca).scalars().all()
+        return render_template('produtos.html', produtos=busca_resultado)
+    lista = select(Produto).order_by(Produto.nome.asc())
+    lista_resultado = db_session.execute(lista).scalars().all()
+    return render_template('produtos.html', produtos=lista_resultado)
+
+@app.route('/produto/excluir/<int:id>', methods=['POST'])
+@login_required
+def excluir_produto(id):
+    produto = db_session.get(Produto, id)
+    if produto:
+        db_session.delete(produto)
         db_session.commit()
-        return redirect(url_for('dashboard'))
-    except Exception as e:
-        db_session.rollback()
-        flash('Ocorreuum error ao salvar','danger')
+        flash('Produto excluído com sucesso!', 'success')
+    else:
+        flash('Produto não encontrado.', 'warning')
+
+    return redirect(url_for('gerenciar_produto'))
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5006, host='0.0.0.0')
+
 
 @app.route('/produto/', methods=['GET','POST'])
 @login_required
