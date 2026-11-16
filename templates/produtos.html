@@ -11,7 +11,7 @@
     <div class="card-body">
         <!-- Requisito 6.1.2: Campo de Busca -->
         <form method="POST" action="{{ url_for('gerenciar_produto') }}" class="d-flex mb-3">
-            <input type="text" name="busca" class="form-control me-2" placeholder="Buscar produto por nome..." value="{{ busca or '' }}">
+            <input type="text" name="busca" class="form-control me-2" placeholder="Buscar produto por nome.." value="{{ busca or '' }}">
             <button class="btn btn-outline-primary" type="submit">Buscar</button>
             <a href="{{ url_for('gerenciar_produto') }}" class="btn btn-outline-secondary ms-2">Limpar</a>
         </form>
